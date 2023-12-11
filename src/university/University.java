@@ -22,10 +22,7 @@ public class University {
         if (facilityAdded == null) {
             return null;
         } else {
-            System.out.println(this.budget);
-            System.out.println(((Building) facilityAdded).getUpgradeCost());
             if (this.budget - ((Building) facilityAdded).getUpgradeCost() < 0) {
-                System.out.println("Here!");
                 this.budget += ((Building) facilityAdded).getUpgradeCost();
                 this.estate.removeFacility(this.estate.getFacilities().length - 1);
                 return null;

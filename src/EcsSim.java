@@ -35,41 +35,42 @@ public class EcsSim {
 
     public void simulate() {
         try {
-            // this.considerHalls();
+            System.out.printf("Dawn of year %d \n", this.yearsElapsed + 1);
+            this.considerHalls();
             this.considerLabs();
             // this.considerTheatres();
             this.university.increaseBudget(10 * this.estate.getNumberOfStudents());
+            this.yearsElapsed += 1;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        this.yearsElapsed += 1;
     }
 
     private void considerHalls() throws Exception {
-        System.out.println("Here");
-        // Only build/ upgrade halls if they are the limiting factor for student population
+        // If the halls capacity is the limiting factor for the number of students, then will attempt to upgrade or build.
+        // Only build a new one if all existing halls are at max level.
         int hallsCapacity = 0;
         for (Facility i : this.estate.getFacilities()) {
             if (i instanceof Hall) {
-                hallsCapacity += ((Building) i).getCapacity();
+                hallsCapacity += ((Hall) i).getCapacity();
             }
         }
-        if (this.estate.getNumberOfStudents() <= hallsCapacity) {
-            boolean hallUpgraded = false;
+
+        boolean hallUpgraded = false;
+        if (hallsCapacity == this.estate.getNumberOfStudents()) {
             for (Facility i : this.estate.getFacilities()) {
-                System.out.println("Here2");
-                System.out.println(((Building) i).getLevel());
-                System.out.println(((Building) i).getMaxLevel());
-                if (i instanceof Hall && ((Building) i).getLevel() < ((Building) i).getMaxLevel()) {
-                    System.out.println("Here 1");
-                    this.university.upgrade((Building) i);
-                    hallUpgraded = true;
+                if (i instanceof Hall) {
+                    if (((Hall) i).getLevel() < ((Hall) i).getMaxLevel()) {
+                        this.university.upgrade((Hall) i);
+                        hallUpgraded = true;
+                        break;
+                    }
                 }
             }
+
             if (!hallUpgraded) {
                 this.university.build("Hall", this.takeBuildingNameFromUser("Hall"));
             }
-            this.considerHalls();
         }
     }
 
@@ -80,7 +81,6 @@ public class EcsSim {
         for (Facility i : this.estate.getFacilities()) {
             if (i instanceof Lab && ((Lab) i).getLevel() < ((Lab) i).getMaxLevel()) {
                 this.university.upgrade((Building) i);
-                System.out.println(((Lab) i).getLevel());
                 labUpgraded = true;
                 break;
             }

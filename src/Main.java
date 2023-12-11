@@ -10,6 +10,6 @@ public class Main {
         e.simulate();
         e.simulate();
         e.simulate();
-        System.out.println(Arrays.toString(e.estate.getFacilities()));
+        e.simulate();
     }
 }

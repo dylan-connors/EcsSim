@@ -17,9 +17,7 @@ public class HumanResource {
         this.staffSalary.put(staff, salary);
     }
 
-    public Iterator<Staff> getStaff() {
-        return this.staffSalary.keySet().iterator();
-    }
+    public Iterator<Staff> getStaff() { return this.staffSalary.keySet().iterator(); }
 
     public float getTotalSalary() { // Calculates how much salary has to be paid for all the staff
         Iterator<Staff> it = this.getStaff();

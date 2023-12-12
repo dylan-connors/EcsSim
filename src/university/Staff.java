@@ -15,6 +15,8 @@ public class Staff {
         this.stamina = 100;
     }
 
+    public String getName() { return this.name; }
+
     public int instruct(int numberOfStudents) { /* Returns the calculated reputation gain, and the stamina loss for the
     staff member */
         this.skill = (this.skill < 100) ? this.skill + 1 : this.skill;

@@ -28,4 +28,8 @@ public class Theatre extends Facility implements Building {
             return this.baseBuildingCost * (this.currentLevel + 1);
         }
     }
+
+    public int getBaseBuildingCost() {
+        return this.baseBuildingCost;
+    }
 }

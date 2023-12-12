@@ -22,12 +22,12 @@ public class University {
         if (facilityAdded == null) {
             return null;
         } else {
-            if (this.budget - ((Building) facilityAdded).getUpgradeCost() < 0) {
-                this.budget += ((Building) facilityAdded).getUpgradeCost();
+            if (this.budget - ((Building) facilityAdded).getBaseBuildingCost() < 0) {
+                this.budget += ((Building) facilityAdded).getBaseBuildingCost();
                 this.estate.removeFacility(this.estate.getFacilities().length - 1);
                 return null;
             } else {
-                this.budget -= ((Building) facilityAdded).getUpgradeCost();
+                this.budget -= ((Building) facilityAdded).getBaseBuildingCost();
                 this.reputation += 100;
             }
             return facilityAdded;
@@ -36,9 +36,10 @@ public class University {
 
     public void upgrade(Building building) throws Exception { // Increases the level of a specified building
         if (this.estate.facilities.contains(building)) {
-            if (building.getLevel() < building.getMaxLevel()) {
-                building.increaseLevel();
+            if (building.getLevel() < building.getMaxLevel() && this.budget - building.getUpgradeCost() > 0) {
                 this.budget -= building.getUpgradeCost();
+                building.increaseLevel();
+                System.out.println();
                 this.reputation += 50;
             } else {
                 throw new Exception("Building cannot be upgraded past its maximum level.");

@@ -82,7 +82,7 @@ public class EcsSim {
     a new one. Labs are very expensive compared to their capacity, so will EITHER be built or upgraded, never both. */
         boolean labUpgraded = false;
         for (Facility i : this.estate.getFacilities()) {
-            if (i instanceof Lab && ((Lab) i).getLevel() < ((Lab) i).getMaxLevel()) {
+            if (i instanceof Lab && ((Lab) i).getLevel() < ((Lab) i).getMaxLevel() && this.university.getBudget() - ((Lab) i).getUpgradeCost() > 0) {
                 this.university.upgrade((Building) i);
                 labUpgraded = true;
                 break;
@@ -108,24 +108,24 @@ public class EcsSim {
         }
     }
 
-    private String takeBuildingNameFromUser(String type) { /* Prints out a specific request based on the building type
-    in order to get the user specified name */
-        System.out.printf("Name the new %s: ", type);
-        return this.scanner.nextLine();
-    }
-
     private void hireStaff() { /* The more staff the better. Attempt to hire one new staff per year, only failing if
     there's no money for it. Should attempt to add the staff with the highest skill level that can be afforded
     (using 10.5% to ensure that they can be afforded) */
         this.staffMarket.sort(Comparator.comparingInt(Staff::getSkill).reversed()); /* Sorts staffMarket from the
         highest skill to lowest */
         for (Staff s : this.staffMarket) {
-            if (this.university.getBudget() - (this.hr.getTotalSalary() + 10.5 * s.getSkill()) > 0) {
+            if ((this.university.getBudget() - (this.hr.getTotalSalary() + 10.5 * s.getSkill())) > 0) {
                 this.hr.addStaff(s);
                 break;
             }
         }
     }
 
+    private String takeBuildingNameFromUser(String type) { /* Prints out a specific request based on the building type
+    in order to get the user specified name */
+        System.out.printf("Name the new %s: ", type);
+        return this.scanner.nextLine();
+    }
+    
 }
 

@@ -10,5 +10,7 @@ public interface Building {
     public abstract int getUpgradeCost(); // Calculates the upgrade cost of a building based on a formula
 
     public abstract int getCapacity(); // Gets the current capacity of the building (which changes based on level)
+
+    public abstract int getBaseBuildingCost();
 }
 

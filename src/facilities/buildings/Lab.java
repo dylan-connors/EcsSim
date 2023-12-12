@@ -19,6 +19,10 @@ public class Lab extends Facility implements Building {
 
     public int getCapacity() { return (int) (this.baseCapacity * Math.pow(2, this.currentLevel - 1)); }
 
+    public int getBaseBuildingCost() {
+        return this.baseBuildingCost;
+    }
+
     public void increaseLevel() { this.currentLevel += 1; }
 
     public int getUpgradeCost() {

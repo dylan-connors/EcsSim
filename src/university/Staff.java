@@ -25,7 +25,7 @@ public class Staff {
     }
 
     public void replenishStamina() { // Increases stamina by 20 as long as this would not exceed 100 stamina (the max)
-        this.stamina = (this.stamina <= 80) ? this.stamina + 20 : this.stamina;
+        this.stamina = (this.stamina <= 80) ? this.stamina + 20 : 100;
     }
 
     public void increaseYearsOfTeaching() {
@@ -33,4 +33,8 @@ public class Staff {
     }
 
     public int getSkill() { return this.skill; }
+
+    public int getYearsOfTeaching() { return this.yearsOfTeaching; }
+
+    public int getStamina() { return this.stamina; }
 }

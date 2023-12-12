@@ -2,12 +2,8 @@ import university.*;
 import facilities.buildings.*;
 import facilities.Facility;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.Scanner;
 
 public class EcsSim {
     University university;
@@ -37,18 +33,44 @@ public class EcsSim {
         this.staffMarket.add(new Staff("Abel", 5));
     }
 
+    public static void main(String[] args) {
+        Setup setup = new Setup(args[0], args[1], args[2]);
+    }
+
+
+
     public void simulate() {
         try {
+            Thread.sleep(500);
+
             System.out.printf("Dawn of year %d \n", this.yearsElapsed + 1);
+
             this.considerHalls();
             this.considerLabs();
             this.considerTheatres();
+
             this.university.increaseBudget(10 * this.estate.getNumberOfStudents());
+
             this.hireStaff();
+            this.allocateStaff();
+
+            this.university.payEstate();
+            this.university.payStaffSalary();
+            this.waxStaff();
+            this.recuseStaff();
+            this.replenishStaffStamina();
+
             this.yearsElapsed += 1;
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void simulate(int years) {
+        for (int i = 1; i <= years; i++) {
+            this.simulate();
+        }
+        System.out.println("Simulation ended!");
     }
 
     private void considerHalls() throws Exception { /* If the halls capacity is the limiting factor for the number of
@@ -79,17 +101,21 @@ public class EcsSim {
     }
 
     private void considerLabs() throws Exception { /* try and upgrade an existing lab. If they're all max level, build
-    a new one. Labs are very expensive compared to their capacity, so will EITHER be built or upgraded, never both. */
-        boolean labUpgraded = false;
+    a new one. Labs are very expensive compared to their capacity, so will EITHER be built or upgraded, never both. Only
+    builds a new lab if no lab was upgraded because they were all max level. If a lab failed to upgrade because it could
+    not be afforded, then no new lab is built to save some coin. */
+        boolean labUpgradedAttempted = false;
         for (Facility i : this.estate.getFacilities()) {
-            if (i instanceof Lab && ((Lab) i).getLevel() < ((Lab) i).getMaxLevel() && this.university.getBudget() - ((Lab) i).getUpgradeCost() > 0) {
-                this.university.upgrade((Building) i);
-                labUpgraded = true;
-                break;
+            if (i instanceof Lab && ((Lab) i).getLevel() < ((Lab) i).getMaxLevel()) {
+                labUpgradedAttempted = true;
+                if (this.university.getBudget() - ((Lab) i).getUpgradeCost() > 0) {
+                    this.university.upgrade((Building) i);
+                    break;
+                }
             }
         }
 
-        if (!labUpgraded) {
+        if (!labUpgradedAttempted) {
             this.university.build("Lab", this.takeBuildingNameFromUser("Lab"));
         }
     }
@@ -108,6 +134,12 @@ public class EcsSim {
         }
     }
 
+    private String takeBuildingNameFromUser(String type) { /* Prints out a specific request based on the building type
+    in order to get the user specified name */
+        System.out.printf("Name the new %s: ", type);
+        return this.scanner.nextLine();
+    }
+
     private void hireStaff() { /* The more staff the better. Attempt to hire one new staff per year, only failing if
     there's no money for it. Should attempt to add the staff with the highest skill level that can be afforded
     (using 10.5% to ensure that they can be afforded) */
@@ -116,16 +148,71 @@ public class EcsSim {
         for (Staff s : this.staffMarket) {
             if ((this.university.getBudget() - (this.hr.getTotalSalary() + 10.5 * s.getSkill())) > 0) {
                 this.hr.addStaff(s);
+                this.staffMarket.remove(s);
                 break;
             }
         }
     }
 
-    private String takeBuildingNameFromUser(String type) { /* Prints out a specific request based on the building type
-    in order to get the user specified name */
-        System.out.printf("Name the new %s: ", type);
-        return this.scanner.nextLine();
+    private void allocateStaff() { /* Allocates class sizes based on staff skill level, with higher skill levels
+    teaching larger groups. */
+        ArrayList<Staff> staffBySkillLvl = new ArrayList<>();
+        Iterator<Staff> it = this.hr.getStaff();
+        int uninstructedStudents = this.estate.getNumberOfStudents();
+        while (it.hasNext()) {
+            Staff s = it.next();
+            staffBySkillLvl.add(s);
+        }
+        staffBySkillLvl.sort(Comparator.comparingInt(Staff::getSkill).reversed());
+
+        ArrayList<Integer> groupSizes = new ArrayList<>();
+        for (int i = 0; i < staffBySkillLvl.size(); i++) {
+            if (i + 1 == staffBySkillLvl.size()) {
+                groupSizes.add(uninstructedStudents);
+            } else {
+                groupSizes.add(Math.floorDiv(uninstructedStudents, 2));
+                uninstructedStudents -= Math.floorDiv(uninstructedStudents, 2);
+            }
+        }
+        groupSizes.sort(Collections.reverseOrder());
+
+        for (int i = 0; i < staffBySkillLvl.size(); i++) {
+            Staff s = staffBySkillLvl.get(i);
+            s.instruct(groupSizes.get(i));
+        }
     }
-    
+
+    private void waxStaff() { // Increases the years of employment for all currently employed staff
+        Iterator<Staff> it = this.hr.getStaff();
+        while (it.hasNext()) {
+            it.next().increaseYearsOfTeaching();
+        }
+    }
+
+    private void recuseStaff() { // Determines which staff leave the uni at the end of the year.
+        Iterator<Staff> it = this.hr.getStaff();
+        while (it.hasNext()) {
+            Staff s = it.next();
+            if (s.getYearsOfTeaching() == 30) {
+                this.hr.removeStaff(s);
+            } else {
+                if (ThreadLocalRandom.current().nextInt(101) > s.getStamina()) {
+                    this.hr.removeStaff(s);
+                    // If the staff leaves because of stamina, they rejoin the staff market and have a little rest
+                    s.replenishStamina();
+                    this.staffMarket.add(s);
+                }
+            }
+        }
+
+    }
+
+    private void replenishStaffStamina() {
+        Iterator<Staff> it = this.hr.getStaff();
+        while (it.hasNext()) {
+            it.next().replenishStamina();
+        }
+    }
+
 }
 

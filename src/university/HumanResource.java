@@ -17,6 +17,11 @@ public class HumanResource {
         this.staffSalary.put(staff, salary);
     }
 
+    public void removeStaff(Staff staff) {
+        System.out.printf("Goodbye %s! \n", staff.name);
+        this.staffSalary.remove(staff);
+    }
+
     public Iterator<Staff> getStaff() { return this.staffSalary.keySet().iterator(); }
 
     public float getTotalSalary() { // Calculates how much salary has to be paid for all the staff

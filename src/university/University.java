@@ -17,6 +17,14 @@ public class University {
 
     public Estate getEstate() { return this.estate; }
 
+    public void payEstate() {
+        this.budget -= this.estate.getMaintenanceCost();
+    }
+
+    public void payStaffSalary() {
+        this.budget -= this.humanResource.getTotalSalary();
+    }
+
     public Facility build(String type, String name) { // Adjusts the university's budget to pay for new buildings, and adjusts reputation
         Facility facilityAdded = this.estate.addFacility(type, name);
         if (facilityAdded == null) {

@@ -15,17 +15,20 @@ public class Staff {
         this.stamina = 100;
     }
 
-    public int instruct(int numberOfStudents) {
+    public int instruct(int numberOfStudents) { /* Returns the calculated reputation gain, and the stamina loss for the
+    staff member */
         this.skill = (this.skill < 100) ? this.skill + 1 : this.skill;
         this.stamina = (int) (this.stamina - Math.ceil((double) numberOfStudents / (20 + this.skill)) * 20);
         return (100 * this.skill) / (100 + numberOfStudents);
     }
 
-    public void replenishStamina() {
+    public void replenishStamina() { // Increases stamina by 20 as long as this would not exceed 100 stamina (the max)
         this.stamina = (this.stamina <= 80) ? this.stamina + 20 : this.stamina;
     }
 
     public void increaseYearsOfTeaching() {
         ++this.yearsOfTeaching;
     }
+
+    public int getSkill() { return this.skill; }
 }

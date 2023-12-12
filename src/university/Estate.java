@@ -14,7 +14,7 @@ public class Estate extends Facility {
 
     public Facility[] getFacilities() { return this.facilities.toArray(new Facility[0]); }
 
-    public Facility addFacility(String type, String name) {
+    public Facility addFacility(String type, String name) { // Adds a new facility based on the type parameter
         switch (type) {
             case "Hall":
                 this.facilities.add(new Hall(name));
@@ -29,9 +29,9 @@ public class Estate extends Facility {
         return this.facilities.get(this.facilities.size() - 1);
     }
 
-    public void removeFacility(int index) { this.facilities.remove(index); }
+    public void removeFacility(int index) { this.facilities.remove(index); } // Removes a facility at a specified index
 
-    public Float getMaintenanceCost() {
+    public Float getMaintenanceCost() { // Calculates the cost of maintaining a facility for one year
         float cost = 0f;
         for (Facility i : this.facilities) {
             cost += ((Building) i).getCapacity() * 0.1f;
@@ -39,7 +39,7 @@ public class Estate extends Facility {
         return cost;
     }
 
-    public int getNumberOfStudents() {
+    public int getNumberOfStudents() { // Calculates the number of students in the estate based on the lowest collective capacity of each of the facility types
         int hallsCapacity = 0;
         int labsCapacity = 0;
         int theatresCapacity = 0;

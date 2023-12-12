@@ -11,7 +11,7 @@ public class HumanResource {
         this.staffSalary = new HashMap<>();
     }
 
-    public void addStaff(Staff staff) {
+    public void addStaff(Staff staff) { // Adds a new staff member and randomly assigns a salary between a range
         double random = ((Math.random() * 11) + 95);
         float salary = (float) random / 10;
         this.staffSalary.put(staff, salary);
@@ -21,7 +21,7 @@ public class HumanResource {
         return this.staffSalary.keySet().iterator();
     }
 
-    public float getTotalSalary() {
+    public float getTotalSalary() { // Calculates how much salary has to be paid for all the staff
         Iterator<Staff> it = this.getStaff();
         float totalSalary = 0f;
         while (it.hasNext()) {

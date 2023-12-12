@@ -17,7 +17,7 @@ public class University {
 
     public Estate getEstate() { return this.estate; }
 
-    public Facility build(String type, String name) {
+    public Facility build(String type, String name) { // Adjusts the university's budget to pay for new buildings, and adjusts reputation
         Facility facilityAdded = this.estate.addFacility(type, name);
         if (facilityAdded == null) {
             return null;
@@ -34,7 +34,7 @@ public class University {
         }
     }
 
-    public void upgrade(Building building) throws Exception {
+    public void upgrade(Building building) throws Exception { // Increases the level of a specified building
         if (this.estate.facilities.contains(building)) {
             if (building.getLevel() < building.getMaxLevel()) {
                 building.increaseLevel();

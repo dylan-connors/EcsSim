@@ -13,8 +13,8 @@ public class EcsSim {
     Scanner scanner;
     int yearsElapsed;
 
-    public EcsSim() {
-        this.university = new University("Cool University", 2000);
+    public EcsSim(int funding, ArrayList<Staff> staffList) {
+        this.university = new University("Cool University", funding);
         this.estate = this.university.getEstate();
         this.hr = new HumanResource();
         this.staffMarket = new ArrayList<>();
@@ -26,18 +26,15 @@ public class EcsSim {
         this.university.build("Lab", "Foundry Laboratory");
         // University is initialised with some buildings
 
-        this.staffMarket.add(new Staff("Methuselah", 75));
-        this.staffMarket.add(new Staff("Jared", 15));
-        this.staffMarket.add(new Staff("Enoch", 21));
-        this.staffMarket.add(new Staff("Cain", 4));
-        this.staffMarket.add(new Staff("Abel", 5));
+        this.staffMarket = new ArrayList<>();
+        staffMarket.addAll(staffList);
     }
 
     public static void main(String[] args) {
         Setup setup = new Setup(args[0], args[1], args[2]);
+        EcsSim ecsSim = new EcsSim(setup.getStartingBudget(), setup.extractStaffFromFile());
+        ecsSim.simulate(setup.yearsToSimulate);
     }
-
-
 
     public void simulate() {
         try {

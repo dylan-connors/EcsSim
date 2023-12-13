@@ -33,7 +33,7 @@ public class EcsSim {
     public static void main(String[] args) {
         Setup setup = new Setup(args[0], args[1], args[2]);
         EcsSim ecsSim = new EcsSim(setup.getStartingBudget(), setup.extractStaffFromFile());
-        ecsSim.simulate(setup.yearsToSimulate);
+        ecsSim.simulate(setup.getYearsToSimulate());
     }
 
     public void simulate() {
@@ -53,7 +53,7 @@ public class EcsSim {
 
             this.university.payEstate();
             this.university.payStaffSalary();
-            this.waxStaff();
+            this.increaseStaffYearsOfEmployment();
             this.recuseStaff();
             this.replenishStaffStamina();
 
@@ -70,8 +70,13 @@ public class EcsSim {
         System.out.println("Simulation ended!");
     }
 
-    private void considerHalls() throws Exception { /* If the halls capacity is the limiting factor for the number of
-    students, then will attempt to upgrade or build. Only build a new one if all existing halls are at max level. */
+    /**
+     * Builds and upgrades halls when they become the limiting factor for capacity. Uses a for each loop to calculate
+     * the capacity provided by the halls, then compares this to the number of students. If these are equal, then halls
+     * are currently limiting the number of students, so should be upgraded/ built. Will attempt to upgrade an existing
+     * halls, only attempting to build new ones if all current halls are max level.
+     */
+    private void considerHalls() throws Exception {
         int hallsCapacity = 0;
         for (Facility i : this.estate.getFacilities()) {
             if (i instanceof Hall) {
@@ -97,10 +102,11 @@ public class EcsSim {
         }
     }
 
-    private void considerLabs() throws Exception { /* try and upgrade an existing lab. If they're all max level, build
-    a new one. Labs are very expensive compared to their capacity, so will EITHER be built or upgraded, never both. Only
-    builds a new lab if no lab was upgraded because they were all max level. If a lab failed to upgrade because it could
-    not be afforded, then no new lab is built to save some coin. */
+    /**
+     * Attempts to upgrade one lab yearly, and will build a new one if all are max level. If the upgrade fails because
+     * it cannot be afforded, no new lab is built (even if it could be afforded) to save coin.
+     */
+    private void considerLabs() throws Exception {
         boolean labUpgradedAttempted = false;
         for (Facility i : this.estate.getFacilities()) {
             if (i instanceof Lab && ((Lab) i).getLevel() < ((Lab) i).getMaxLevel()) {
@@ -117,8 +123,11 @@ public class EcsSim {
         }
     }
 
-    private void considerTheatres() throws Exception { /* Theatres will attempt to be upgraded yearly, but new ones will
-    only attempt to be built every two years, 50% of the time, as their base capacity is so high. */
+    /** Theatres have a high base capacity, so are built at a lower rate than the other two facilities. Every two years,
+     * there is a 50% chance for a new theatre to be built (budget permitting). One existing theatre will attempt to be
+     * upgraded yearly.
+     */
+    private void considerTheatres() throws Exception {
         for (Facility i : this.estate.getFacilities()) {
             if (i instanceof Theatre && ((Theatre) i).getMaxLevel() > ((Theatre) i).getLevel() && this.university.getBudget() - ((Theatre) i).getUpgradeCost() > 0) {
                 this.university.upgrade((Building) i);
@@ -131,17 +140,23 @@ public class EcsSim {
         }
     }
 
-    private String takeBuildingNameFromUser(String type) { /* Prints out a specific request based on the building type
-    in order to get the user specified name */
+    /**
+     * Takes the building type as a param and prints out a message based on this, then uses the scanner class to take
+     * the user's input. A string of the user's input is returned. */
+    private String takeBuildingNameFromUser(String type) {
         System.out.printf("Name the new %s: ", type);
         return this.scanner.nextLine();
     }
 
-    private void hireStaff() { /* The more staff the better. Attempt to hire one new staff per year, only failing if
-    there's no money for it. Should attempt to add the staff with the highest skill level that can be afforded
-    (using 10.5% to ensure that they can be afforded) */
-        this.staffMarket.sort(Comparator.comparingInt(Staff::getSkill).reversed()); /* Sorts staffMarket from the
-        highest skill to lowest */
+    /**
+     * Attempts to hire one staff per year, only failing if there is no budget for it. This is calculated based on the
+     * max possible salary for that staff member (10.5 * skill). The staff member with the highest skill level that
+     * can be afforded that year is hired. The List.sort method and the Comparator class are used to sort the staff
+     * market by skill, then a for each loop is used to find the most skilled staff that can be afforded.
+     * Staff are removed from staff market once hired.
+     */
+    private void hireStaff() {
+        this.staffMarket.sort(Comparator.comparingInt(Staff::getSkill).reversed());
         for (Staff s : this.staffMarket) {
             if ((this.university.getBudget() - (this.hr.getTotalSalary() + 10.5 * s.getSkill())) > 0) {
                 this.hr.addStaff(s);
@@ -151,8 +166,11 @@ public class EcsSim {
         }
     }
 
-    private void allocateStaff() { /* Allocates class sizes based on staff skill level, with higher skill levels
-    teaching larger groups. */
+    /**
+     * Higher skilled staff teach larger classes to manage stamina loss. The staff in the estate are sorted by skill.
+     * The students are split into groups of descending size, and then allocated to staff based on skill level.
+     */
+    private void allocateStaff() {
         ArrayList<Staff> staffBySkillLvl = new ArrayList<>();
         Iterator<Staff> it = this.hr.getStaff();
         int uninstructedStudents = this.estate.getNumberOfStudents();
@@ -179,13 +197,20 @@ public class EcsSim {
         }
     }
 
-    private void waxStaff() { // Increases the years of employment for all currently employed staff
+    /**
+     * Uses the Iterator from the human resource class to iterate over the staff objects and apply the
+     * increaseYearsOfTeaching method to them.
+     */
+    private void increaseStaffYearsOfEmployment() { // Increases the years of employment for all currently employed staff
         Iterator<Staff> it = this.hr.getStaff();
         while (it.hasNext()) {
             it.next().increaseYearsOfTeaching();
         }
     }
 
+    /** Handles the removal of staff at the end of each year. Uses threadLocalRandom to remove staff with a stamina%
+     * chance
+     */
     private void recuseStaff() { // Determines which staff leave the uni at the end of the year.
         Iterator<Staff> it = this.hr.getStaff();
         while (it.hasNext()) {
@@ -204,12 +229,13 @@ public class EcsSim {
 
     }
 
+    /** Uses the staff iterator to iterate over the staff and replenish their stamina with the replenishStamina method
+     */
     private void replenishStaffStamina() {
         Iterator<Staff> it = this.hr.getStaff();
         while (it.hasNext()) {
             it.next().replenishStamina();
         }
     }
-
 }
 

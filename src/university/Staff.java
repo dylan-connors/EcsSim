@@ -17,16 +17,20 @@ public class Staff {
 
     public String getName() { return this.name; }
 
-    public int instruct(int numberOfStudents) { /* Returns the calculated reputation gain, and the stamina loss for the
-    staff member */
+    /**
+     * Takes the number of students to instruct and uses it to calculate the stamina drain on the staff.
+     */
+    public int instruct(int numberOfStudents) {
         this.skill = (this.skill < 100) ? this.skill + 1 : this.skill;
         this.stamina = (int) (this.stamina - Math.ceil((double) numberOfStudents / (20 + this.skill)) * 20);
         return (100 * this.skill) / (100 + numberOfStudents);
     }
 
-    public void replenishStamina() { // Increases stamina by 20 as long as this would not exceed 100 stamina (the max)
-        this.stamina = (this.stamina <= 80) ? this.stamina + 20 : 100;
-    }
+    /**
+     * Uses a ternary operator to increase the stamina by 20, unless this would exceed 100, in which case the stamina
+     * is set to 100.
+     */
+    public void replenishStamina() { this.stamina = (this.stamina <= 80) ? this.stamina + 20 : 100; }
 
     public void increaseYearsOfTeaching() {
         ++this.yearsOfTeaching;

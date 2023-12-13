@@ -3,6 +3,7 @@ package university;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.lang.Math;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class HumanResource {
     HashMap<Staff, Float> staffSalary;
@@ -11,9 +12,12 @@ public class HumanResource {
         this.staffSalary = new HashMap<>();
     }
 
-    public void addStaff(Staff staff) { // Adds a new staff member and randomly assigns a salary between a range
-        double random = ((Math.random() * 11) + 95);
-        float salary = (float) random / 10;
+    /**
+     * Uses threadLocalRandom to generate a random number to calculate the salary in the given range.
+     */
+    public void addStaff(Staff staff) {
+        int random = ThreadLocalRandom.current().nextInt(95, 106);
+        float salary = (float) (random / 10) * staff.getSkill();
         this.staffSalary.put(staff, salary);
     }
 
@@ -24,6 +28,9 @@ public class HumanResource {
 
     public Iterator<Staff> getStaff() { return this.staffSalary.keySet().iterator(); }
 
+    /**
+     * Uses a while loop to add up the salaries of each staff employed at the uni.
+     */
     public float getTotalSalary() { // Calculates how much salary has to be paid for all the staff
         Iterator<Staff> it = this.getStaff();
         float totalSalary = 0f;

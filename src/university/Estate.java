@@ -4,11 +4,10 @@ import facilities.Facility;
 import facilities.buildings.*;
 import java.util.ArrayList;
 
-public class Estate extends Facility {
+public class Estate {
     ArrayList<Facility> facilities;
 
-    public Estate(String name) {
-        super(name);
+    public Estate() {
         this.facilities = new ArrayList<>();
     }
 
@@ -29,6 +28,8 @@ public class Estate extends Facility {
             case "Theatre":
                 this.facilities.add(new Theatre(name));
                 break;
+            default:
+                return null;
         }
         return this.facilities.get(this.facilities.size() - 1);
     }
@@ -39,13 +40,13 @@ public class Estate extends Facility {
     public void removeFacility(int index) { this.facilities.remove(index); }
 
     /**
-     * Uses a for each loop to add up the maintenance cost of all the facilities in the estate. Returns a this cost as
+     * Uses a for each loop to add up the maintenance cost of all the facilities in the estate. Returns this cost as
      * a float.
      */
-    public Float getMaintenanceCost() { // Calculates the cost of maintaining a facility for one year
+    public float getMaintenanceCost() {
         float cost = 0f;
         for (Facility i : this.facilities) {
-            cost += ((Building) i).getCapacity() * 0.1f;
+            cost += ((float) ((Building) i).getCapacity()) * 0.1f;
         }
         return cost;
     }
@@ -54,7 +55,7 @@ public class Estate extends Facility {
      * Calculates the number of students by using a for each loop and an if statement to add up the capacity of all the
      * different facility types in the estate, then using a nested Math.min method to find the lowest of the three.
      */
-    public int getNumberOfStudents() { // Calculates the number of students in the estate based on the lowest collective capacity of each of the facility types
+    public int getNumberOfStudents() {
         int hallsCapacity = 0;
         int labsCapacity = 0;
         int theatresCapacity = 0;

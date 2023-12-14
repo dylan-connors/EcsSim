@@ -9,9 +9,9 @@ public class University {
     float budget;
     int reputation;
 
-    public University(String name, int funding) {
+    public University(int funding) {
         this.budget = funding;
-        this.estate = new Estate(name);
+        this.estate = new Estate();
         this.humanResource = new HumanResource();
     }
 
@@ -52,15 +52,13 @@ public class University {
      */
     public void upgrade(Building building) throws Exception { // Increases the level of a specified building
         if (this.estate.facilities.contains(building)) {
-            if (building.getLevel() < building.getMaxLevel() && this.budget - building.getUpgradeCost() > 0) {
+            if (building.getLevel() < building.getMaxLevel()) {
                 this.budget -= building.getUpgradeCost();
                 building.increaseLevel();
                 System.out.println();
                 this.reputation += 50;
-            } else if (building.getLevel() == building.getMaxLevel()) {
-                throw new Exception("Building cannot be upgraded past its maximum level.");
             } else {
-                throw new Exception("Upgrade too expensive!");
+                throw new Exception("Building cannot be upgraded past its maximum level.");
             }
         } else {
             throw new Exception("Building not part of university.");

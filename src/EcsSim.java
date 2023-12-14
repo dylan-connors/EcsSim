@@ -14,7 +14,7 @@ public class EcsSim {
     int yearsElapsed;
 
     public EcsSim(int funding, ArrayList<Staff> staffList) {
-        this.university = new University("Cool University", funding);
+        this.university = new University(funding);
         this.estate = this.university.getEstate();
         this.hr = new HumanResource();
         this.staffMarket = new ArrayList<>();

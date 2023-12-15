@@ -36,6 +36,10 @@ public class EcsSim {
         staffMarket.addAll(staffList);
     }
 
+    /**
+     * Uses a switch case statement to determine if a new simulation should be started, or an existing one should be
+     * loaded, based on the number of arguments.
+     */
     public static void main(String[] args) throws FileNotFoundException {
         EcsSim ecsSim;
         switch (args.length) {
@@ -55,12 +59,6 @@ public class EcsSim {
     }
 
     private void setYearsElapsed(int years) { this.yearsElapsed = years; }
-
-    public void restoreEstate(ArrayList<Facility> facilities) {
-        for (Facility i : facilities) {
-            this.estate.addFacility(i.getClass().getSimpleName(), i.getName());
-        }
-    }
 
     public void simulate() {
         try {

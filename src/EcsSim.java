@@ -6,11 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Comparator;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class EcsSim {
@@ -50,7 +46,7 @@ public class EcsSim {
             case(2):
                 SimulationLoader simLoader = new SimulationLoader(args[0]);
                 ecsSim = new EcsSim(simLoader.extractBudget(), simLoader.extractStaffMarket(), true);
-                ecsSim.restoreEstate(simLoader.extractFacilities());
+                simLoader.extractFacilities(ecsSim.estate);
                 ecsSim.setYearsElapsed(simLoader.extractStartingYear());
                 simLoader.extractEmployedStaff(ecsSim.hr);
                 ecsSim.simulate(Integer.parseInt(args[1]));
@@ -177,7 +173,7 @@ public class EcsSim {
 
             writer.write("facilities:\n");
             for (Facility i : this.estate.getFacilities()) {
-                writer.write(String.format("%s %s %d%n",
+                writer.write(String.format("%s:%s:%d%n",
                         i.getClass().getSimpleName(),
                         i.getName(),
                         ((Building) i).getLevel()));
@@ -185,7 +181,7 @@ public class EcsSim {
 
             writer.write("staff market:\n");
             for (Staff i: this.staffMarket) {
-                writer.write(String.format("%s %d %d%n", i.getName(), i.getSkill(), i.getStamina()));
+                writer.write(String.format("%s:%d:%d%n", i.getName(), i.getSkill(), i.getStamina()));
             }
 
             writer.write("staff:\n");
@@ -193,7 +189,7 @@ public class EcsSim {
             Staff s;
             while (it.hasNext()) {
                 s = it.next();
-                writer.write(String.format("%s %f %d %d%n", s.getName(),
+                writer.write(String.format("%s:%f:%d:%d%n", s.getName(),
                         this.hr.getStaffSalary(s),
                         s.getStamina(),
                         s.getSkill()));

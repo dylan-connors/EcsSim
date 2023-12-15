@@ -34,6 +34,11 @@ public class Estate {
         return this.facilities.get(this.facilities.size() - 1);
     }
 
+    public Facility addFacility(Building building) {
+        this.facilities.add((Facility) building);
+        return (Facility) building;
+    }
+
     /**
      * Removes a facility at the index specified in the params.
      */

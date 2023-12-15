@@ -2,7 +2,15 @@ import university.*;
 import facilities.buildings.*;
 import facilities.Facility;
 
-import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Comparator;
+import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class EcsSim {
@@ -13,7 +21,7 @@ public class EcsSim {
     Scanner scanner;
     int yearsElapsed;
 
-    public EcsSim(int funding, ArrayList<Staff> staffList) {
+    public EcsSim(float funding, ArrayList<Staff> staffList, boolean loadFlag) {
         this.university = new University(funding);
         this.estate = this.university.getEstate();
         this.hr = new HumanResource();
@@ -21,19 +29,41 @@ public class EcsSim {
         this.scanner = new Scanner(System.in);
         this.yearsElapsed = 0;
 
-        this.university.build("Hall", "Auspices Hall");
-        this.university.build("Theatre", "Plunkett Lecture Theatre");
-        this.university.build("Lab", "Foundry Laboratory");
-        // University is initialised with some buildings
+        if (!loadFlag) {
+            this.university.build("Hall", "Auspices Hall");
+            this.university.build("Theatre", "Plunkett Lecture Theatre");
+            this.university.build("Lab", "Foundry Laboratory");
+            // University is initialised with some buildings
+        }
 
         this.staffMarket = new ArrayList<>();
         staffMarket.addAll(staffList);
     }
 
-    public static void main(String[] args) {
-        Setup setup = new Setup(args[0], args[1], args[2]);
-        EcsSim ecsSim = new EcsSim(setup.getStartingBudget(), setup.extractStaffFromFile());
-        ecsSim.simulate(setup.getYearsToSimulate());
+    public static void main(String[] args) throws FileNotFoundException {
+        EcsSim ecsSim;
+        switch (args.length) {
+            case(3):
+                Setup setup = new Setup(args[0], args[1], args[2]);
+                ecsSim = new EcsSim(setup.getStartingBudget(), setup.extractStaffFromFile(), false);
+                ecsSim.simulate(setup.getYearsToSimulate());
+            case(2):
+                SimulationLoader simLoader = new SimulationLoader(args[0]);
+                ecsSim = new EcsSim(simLoader.extractBudget(), simLoader.extractStaffMarket(), true);
+                ecsSim.restoreEstate(simLoader.extractFacilities());
+                ecsSim.setYearsElapsed(simLoader.extractStartingYear());
+                simLoader.extractEmployedStaff(ecsSim.hr);
+                ecsSim.simulate(Integer.parseInt(args[1]));
+        }
+
+    }
+
+    private void setYearsElapsed(int years) { this.yearsElapsed = years; }
+
+    public void restoreEstate(ArrayList<Facility> facilities) {
+        for (Facility i : facilities) {
+            this.estate.addFacility(i.getClass().getSimpleName(), i.getName());
+        }
     }
 
     public void simulate() {
@@ -59,7 +89,7 @@ public class EcsSim {
 
             this.yearsElapsed += 1;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
@@ -67,7 +97,112 @@ public class EcsSim {
         for (int i = 1; i <= years; i++) {
             this.simulate();
         }
-        System.out.println("Simulation ended!");
+        this.endMenu();
+    }
+
+    /**
+     * Displays a menu once the simulation is over. Uses the scanner class to take an input from the user, then uses a
+     * switch statement to execute their choice.
+     */
+    private void endMenu() {
+        System.out.println("[1] Quit");
+        System.out.println("[2] Save & Quit");
+        System.out.print("::");
+        int menuChoice;
+        while (true) {
+            menuChoice = scanner.nextInt();
+            try {
+                if (menuChoice == 1 || menuChoice == 2) {
+                    break;
+                } else {
+                    System.out.println("Not an option");
+                }
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+        }
+
+        switch (menuChoice) {
+            case(1):
+                System.out.println("Easy come, easy go...");
+                System.exit(0);
+            case(2):
+                this.saveState();
+                System.out.println("You're gonna carry that weight.");
+                System.exit(0);
+        }
+    }
+
+    /**
+     * Executes methods related to saving the state of the simulated university.
+     */
+    private void saveState() {
+        File file = this.createSaveFile();
+        writeSaveDataToFile(file);
+    }
+
+    /**
+     * Uses the File class to create a new file which the save data will be written to. Uses a while loop to ensure that
+     * the save file has a unique name, in the format save(number).txt. Returns the File object created.
+     */
+    private File createSaveFile() {
+        int fileNum = 1;
+        try {
+            while (true) {
+                File file = new File(String.format("src/saves/save%d.txt", fileNum));
+                if (file.createNewFile()) {
+                    System.out.printf("Saved as save%d.txt%n", fileNum);
+                    return file;
+                } else {
+                    fileNum++;
+                }
+            }
+        } catch(IOException e){
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Uses the fileWriter class to write save data to the file specified in the params. Writes years elapsed, the
+     * currently built facilities, the current staff in the staff market, and the currently employed staff.
+     */
+    private void writeSaveDataToFile(File file) {
+        try {
+            FileWriter writer = new FileWriter(file);
+
+            writer.write(String.format("year:%n%d%n", this.yearsElapsed));
+
+            writer.write(String.format("budget:%n%f%n", this.university.getBudget()));
+
+            writer.write("facilities:\n");
+            for (Facility i : this.estate.getFacilities()) {
+                writer.write(String.format("%s %s %d%n",
+                        i.getClass().getSimpleName(),
+                        i.getName(),
+                        ((Building) i).getLevel()));
+            }
+
+            writer.write("staff market:\n");
+            for (Staff i: this.staffMarket) {
+                writer.write(String.format("%s %d %d%n", i.getName(), i.getSkill(), i.getStamina()));
+            }
+
+            writer.write("staff:\n");
+            Iterator<Staff> it = this.hr.getStaff();
+            Staff s;
+            while (it.hasNext()) {
+                s = it.next();
+                writer.write(String.format("%s %f %d %d%n", s.getName(),
+                        this.hr.getStaffSalary(s),
+                        s.getStamina(),
+                        s.getSkill()));
+            }
+
+            writer.close();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     /**
@@ -211,15 +346,15 @@ public class EcsSim {
     /** Handles the removal of staff at the end of each year. Uses threadLocalRandom to remove staff with a stamina%
      * chance
      */
-    private void recuseStaff() { // Determines which staff leave the uni at the end of the year.
+    private void recuseStaff() {
         Iterator<Staff> it = this.hr.getStaff();
         while (it.hasNext()) {
             Staff s = it.next();
             if (s.getYearsOfTeaching() == 30) {
-                this.hr.removeStaff(s);
+                it.remove();
             } else {
                 if (ThreadLocalRandom.current().nextInt(101) > s.getStamina()) {
-                    this.hr.removeStaff(s);
+                    it.remove();
                     // If the staff leaves because of stamina, they rejoin the staff market and have a little rest
                     s.replenishStamina();
                     this.staffMarket.add(s);

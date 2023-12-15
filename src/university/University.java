@@ -9,7 +9,7 @@ public class University {
     float budget;
     int reputation;
 
-    public University(int funding) {
+    public University(float funding) {
         this.budget = funding;
         this.estate = new Estate();
         this.humanResource = new HumanResource();

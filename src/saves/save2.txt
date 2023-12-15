@@ -1,0 +1,19 @@
+year:
+7
+budget:
+9860.900391
+facilities:
+Hall Auspices Hall 4
+Theatre Plunkett Lecture Theatre 6
+Lab Foundry Laboratory 5
+Hall greg 3
+Lab jeg 3
+Theatre cheg 2
+staff market:
+Nael Deus Darnus 46 46
+staff:
+Ardyn 670.000000 100 69
+Necron 520.000000 100 53
+Bahamut 900.000000 100 97
+Ultimecia 820.000000 100 86
+Gilgamesh 710.000000 100 74

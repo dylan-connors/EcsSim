@@ -21,12 +21,20 @@ public class HumanResource {
         this.staffSalary.put(staff, salary);
     }
 
+    public void addStaff(Staff staff, float salary) {
+        this.staffSalary.put(staff, salary);
+    }
+
     public void removeStaff(Staff staff) {
         System.out.printf("Goodbye %s! \n", staff.name);
         this.staffSalary.remove(staff);
     }
 
     public Iterator<Staff> getStaff() { return this.staffSalary.keySet().iterator(); }
+
+    public float getStaffSalary(Staff staff) {
+        return this.staffSalary.get(staff);
+    }
 
     /**
      * Uses a while loop to add up the salaries of each staff employed at the uni.

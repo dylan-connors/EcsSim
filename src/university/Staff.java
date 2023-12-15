@@ -32,13 +32,13 @@ public class Staff {
      */
     public void replenishStamina() { this.stamina = (this.stamina <= 80) ? this.stamina + 20 : 100; }
 
-    public void increaseYearsOfTeaching() {
-        ++this.yearsOfTeaching;
-    }
+    public void increaseYearsOfTeaching() { ++this.yearsOfTeaching; }
 
     public int getSkill() { return this.skill; }
 
     public int getYearsOfTeaching() { return this.yearsOfTeaching; }
 
     public int getStamina() { return this.stamina; }
+
+    public void setStamina(int stam) { this.stamina = stam; }
 }

@@ -25,6 +25,10 @@ public class Hall extends Facility implements Building {
 
     public void increaseLevel() { this.level += 1; }
 
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
     public int getUpgradeCost() {
         if (this.level >= this.maxLevel) { // If it is at max level then upgrade cost is irrelevant
             return -1;
